@@ -15,5 +15,11 @@ htmlcov/
 
 .ruff_cache/
 
+.env
 
+.venv/
+
+.pytest_cache/
+
+.idea/
 
