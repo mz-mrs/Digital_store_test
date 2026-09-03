@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 from decimal import Decimal
 from pathlib import Path
 
@@ -7,6 +8,8 @@ from sqlalchemy import select
 
 from app.db.session import async_session_factory
 from app.models.product import Currency, Product, ProductType
+
+logger = logging.getLogger(__name__)
 
 
 PRODUCTS_FILE = Path(__file__).parent.parent / "data" / "catalog.json"
@@ -37,6 +40,8 @@ async def products_to_db() -> None:
             session.add(product)
 
         await session.commit()
+
+        logger.info("Успешная загрузка товаров в базу")
 
 
 if __name__ == "__main__":

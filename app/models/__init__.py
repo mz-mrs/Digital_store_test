@@ -3,6 +3,7 @@ from .order import Order
 from .order_item import OrderItem
 from .payment_event import PaymentEvent
 from .product import Product
+from .provider_key import ProviderKey
 
 
 __all__ = [
@@ -11,4 +12,5 @@ __all__ = [
     'OrderItem',
     'PaymentEvent',
     'Product',
+    'ProviderKey'
 ]

@@ -10,7 +10,7 @@ from app.enums import DeliveryStatus
 
 
 if TYPE_CHECKING:
-    from app.models import Order
+    from app.models import Order, ProviderKey
 
 
 class Delivery(Base):
@@ -75,5 +75,9 @@ class Delivery(Base):
     )
 
     order: Mapped["Order"] = relationship(
+        back_populates="delivery",
+    )
+
+    provider_key: Mapped["ProviderKey | None"] = relationship(
         back_populates="delivery",
     )
