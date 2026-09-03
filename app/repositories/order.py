@@ -2,6 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models import Order, Product
 
@@ -24,6 +25,8 @@ class OrderRepository:
 
     async def get_by_id(self, order_id: UUID) -> Order | None:
         result = await self.session.execute(
-            select(Order).where(Order.id == order_id)
+            select(Order)
+            .options(selectinload(Order.items))
+            .where(Order.id == order_id)
         )
         return result.scalar_one_or_none()
