@@ -9,9 +9,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db import Base
 from app.enums import OrderStatus
 
-
 if TYPE_CHECKING:
-    from app.models import OrderItem
+    from app.models import Delivery, OrderItem, PaymentEvent
 
 class Order(Base):
     __tablename__ = "orders"
@@ -59,4 +58,15 @@ class Order(Base):
     items: Mapped[list["OrderItem"]] = relationship(
         back_populates="order",
         cascade="all, delete-orphan",
+    )
+
+    payment: Mapped[list["PaymentEvent"]] = relationship(
+        back_populates="order",
+        cascade="all, delete-orphan",
+    )
+
+    delivery: Mapped["Delivery | None"] = relationship(
+        back_populates="order",
+        cascade="all, delete-orphan",
+        uselist=False,
     )
