@@ -67,5 +67,5 @@ class PaymentEvent(Base):
     )
 
     order: Mapped["Order"] = relationship(
-        back_populates="payment_event",
+        back_populates="payment_events",
     )

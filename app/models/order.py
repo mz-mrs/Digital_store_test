@@ -60,7 +60,7 @@ class Order(Base):
         cascade="all, delete-orphan",
     )
 
-    payment: Mapped[list["PaymentEvent"]] = relationship(
+    payment_events: Mapped[list["PaymentEvent"]] = relationship(
         back_populates="order",
         cascade="all, delete-orphan",
     )
