@@ -1,6 +1,5 @@
 from datetime import datetime
 from decimal import Decimal
-from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -11,7 +10,7 @@ class PaymentWebhook(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     event_id: str = Field(min_length=1, max_length=255)
-    order_id: UUID
+    order_id: str = Field(min_length=1, max_length=255)
     status: PaymentStatus
     amount: Decimal = Field(ge=0)
     currency: str = Field(default="RUB", min_length=3, max_length=3)

@@ -1,24 +1,22 @@
 from datetime import datetime
 from decimal import Decimal
-from uuid import uuid4
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum, Numeric, String, DateTime, func, UUID
+from sqlalchemy import Enum, Numeric, String, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 from app.enums import OrderStatus
 
 if TYPE_CHECKING:
-    from app.models import Delivery, OrderItem, PaymentEvent
+    from app.models import Delivery, OrderItem
 
 class Order(Base):
     __tablename__ = "orders"
 
-    id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True),
+    id: Mapped[str] = mapped_column(
+        String(255),
         primary_key=True,
-        default=uuid4,
     )
 
     status: Mapped[OrderStatus] = mapped_column(
@@ -56,11 +54,6 @@ class Order(Base):
     )
 
     items: Mapped[list["OrderItem"]] = relationship(
-        back_populates="order",
-        cascade="all, delete-orphan",
-    )
-
-    payment_events: Mapped[list["PaymentEvent"]] = relationship(
         back_populates="order",
         cascade="all, delete-orphan",
     )

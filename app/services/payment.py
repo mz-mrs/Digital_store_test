@@ -33,13 +33,6 @@ class PaymentService:
             .with_for_update()
         )
 
-        if order is None:
-            logger.warning(
-                "Вебхук отклонен, заказ не найден order_id=%s",
-                payload.order_id
-            )
-            raise ValueError("Заказ не найден")
-
         statement = (
             insert(PaymentEvent)
             .values(
@@ -64,6 +57,15 @@ class PaymentService:
                 payload.event_id
             )
             await self.session.rollback()
+            return
+
+        if order is None:
+            logger.info(
+                "Заказ еще не создан, вебхук сохранен order_id=%s event_id=%s",
+                payload.order_id,
+                payload.event_id,
+            )
+            await self.session.commit()
             return
 
         logger.info(

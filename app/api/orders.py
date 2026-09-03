@@ -41,7 +41,7 @@ async def create_order(
     description='Получение заказа по id'
 )
 async def get_order(
-    id: UUID,
+    id: str,
     repository: OrderRepository = Depends(get_order_repository),
 ) -> OrderResponse:
 

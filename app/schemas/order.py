@@ -1,6 +1,5 @@
 from datetime import datetime
 from decimal import Decimal
-from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -8,6 +7,7 @@ from app.enums import OrderStatus
 
 
 class OrderCreate(BaseModel):
+    order_id: str = Field(min_length=1, max_length=255)
     sku: str = Field(min_length=1, max_length=100)
     quantity: int = Field(gt=0)
 
@@ -23,7 +23,7 @@ class OrderItemResponse(BaseModel):
 class OrderResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: UUID
+    id: str
     status: OrderStatus
     amount: Decimal
     currency: str

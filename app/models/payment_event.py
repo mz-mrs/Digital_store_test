@@ -3,15 +3,12 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Numeric, String, func, UUID
+from sqlalchemy import DateTime, Enum, Numeric, String, func, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 from app.enums import PaymentStatus
 
-
-if TYPE_CHECKING:
-    from app.models import Order
 
 
 class PaymentEvent(Base):
@@ -30,8 +27,8 @@ class PaymentEvent(Base):
         index=True,
     )
 
-    order_id: Mapped[UUID] = mapped_column(
-        ForeignKey("orders.id", ondelete="CASCADE"),
+    order_id: Mapped[str] = mapped_column(
+        String(255),
         nullable=False,
         index=True,
     )
@@ -64,8 +61,4 @@ class PaymentEvent(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
-    )
-
-    order: Mapped["Order"] = relationship(
-        back_populates="payment_events",
     )

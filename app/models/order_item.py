@@ -21,7 +21,7 @@ class OrderItem(Base):
         default=uuid4,
     )
 
-    order_id: Mapped[UUID] = mapped_column(
+    order_id: Mapped[str] = mapped_column(
         ForeignKey("orders.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
