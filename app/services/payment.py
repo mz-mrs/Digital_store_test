@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.enums import OrderStatus, PaymentStatus
 from app.models import Order, PaymentEvent
+from app.repositories import PaymentRepository
 from app.schemas.payment import PaymentWebhook
 
 logger = logging.getLogger(__name__)
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 class PaymentService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        self.repository = PaymentRepository(session)
 
     async def process_webhook(
         self,
@@ -27,30 +29,14 @@ class PaymentService:
             payload.status.value
         )
 
-        order = await self.session.scalar(
-            select(Order)
-            .where(Order.id == payload.order_id)
-            .with_for_update()
+        order = await self.repository.get_order_for_update(
+            payload.order_id
         )
 
-        statement = (
-            insert(PaymentEvent)
-            .values(
-                event_id=payload.event_id,
-                order_id=payload.order_id,
-                status=payload.status,
-                amount=payload.amount,
-                currency=payload.currency,
-                created_at=payload.created_at,
-            )
-            .on_conflict_do_nothing(
-                index_elements=[PaymentEvent.event_id],
-            )
-        )
+        created_payment_event = await self.repository.create_payment_event(payload)
 
-        result = await self.session.execute(statement)
 
-        if result.rowcount == 0:
+        if not created_payment_event:
             logger.info(
                 "Вебхук повторный, игнор order_id=%s event_id=%s",
                 payload.order_id,
