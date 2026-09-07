@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models import Order, PaymentEvent
 from app.schemas.payment import PaymentWebhook
@@ -17,6 +18,7 @@ class PaymentRepository:
 
         return await self.session.scalar(
             select(Order)
+            .options(selectinload(Order.items))
             .where(Order.id == order_id)
             .with_for_update()
         )

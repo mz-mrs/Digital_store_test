@@ -1,13 +1,15 @@
 import logging
 
-from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.enums import OrderStatus, PaymentStatus
-from app.models import Order, PaymentEvent
-from app.repositories import PaymentRepository
+from app.core.generate_ids import generate_request_id
+from app.enums import OrderStatus, PaymentStatus, DeliveryStatus
+from app.models import Delivery
+from app.repositories import PaymentRepository, ProviderKeyRepository
 from app.schemas.payment import PaymentWebhook
+from app.schemas.provider import ProviderIssueRequest
+from provider.provider_simulator import ProviderError
+from app.services.provider_service import ProviderService
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +18,10 @@ class PaymentService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.repository = PaymentRepository(session)
+        self.provider_key_repository = ProviderKeyRepository(session)
+        self.provider_service = ProviderService(
+            provider_key_repository=self.provider_key_repository,
+        )
 
     async def process_webhook(
         self,
@@ -75,20 +81,76 @@ class PaymentService:
         if payload.status == PaymentStatus.PAID:
             order.status = OrderStatus.PAID
 
+            request_id=generate_request_id(order.id, 1)
+
+            delivery = Delivery(
+                order_id=order.id,
+                request_id=request_id,
+                sku=order.items[0].sku,
+                status=DeliveryStatus.PENDING,
+            )
+
+            self.session.add(delivery)
+            await self.session.flush()
+
+
+            issue_request = ProviderIssueRequest(
+                request_id=delivery.request_id,
+                sku=delivery.sku,
+                order_id=delivery.order_id,
+            )
+
+            try:
+
+                provider, code = await self.provider_service.issue(
+                    issue_request=issue_request,
+                )
+
+            except ProviderError as exc:
+                logger.error(
+                    "Не удалось выдать товар order_id=%s request_id=%s error=%s",
+                    order.id,
+                    delivery.request_id,
+                    exc,
+                )
+
+                delivery.status = DeliveryStatus.PENDING
+                await self.session.commit()
+                return
+
+            delivery.provider = provider
+            delivery.code = code
+            delivery.status = DeliveryStatus.DELIVERED
+
+            # provider_key = await self.provider_key_repository.take_available_key(
+            #     delivery_id=delivery.id,
+            #     request_id=request_id
+            # )
+            #
+            # if provider_key is None:
+            #     logger.error(
+            #         "Нет доступных ключей для доставки order_id=%s",
+            #         order.id,
+            #     )
+            #
+            #     await self.session.rollback()
+            #     return
+
             logger.info(
-                "Заказ оплачен успешно order_id=%s event_id=%s",
-                payload.order_id,
-                payload.event_id
+                "Товар выдан order_id=%s provider=%s request_id=%s",
+                order.id,
+                provider,
+                delivery.request_id
             )
 
         else:
+            order.status = OrderStatus.PAYMENT_FAILED
+
             logger.info(
                 "Статус заказа не оплачен order_id=%s event_id=%s",
                 payload.order_id,
                 payload.event_id
             )
-
-            order.status = OrderStatus.PAYMENT_FAILED
 
         await self.session.commit()
 

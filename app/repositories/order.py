@@ -9,6 +9,7 @@ class OrderRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
+
     async def get_product_by_sku(self, sku: str) -> Product | None:
         result = await self.session.execute(
             select(Product).where(Product.sku == sku)
