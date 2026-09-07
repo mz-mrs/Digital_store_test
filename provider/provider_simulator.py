@@ -2,8 +2,8 @@ import asyncio
 import logging
 from random import random
 
-from app.repositories import ProviderKeyRepository
-from app.schemas.provider import ProviderIssueRequest, ProviderIssueResponse
+from provider.provider_key_repository import ProviderKeyRepository
+from provider.provider_schemas import ProviderIssueRequest, ProviderIssueResponse
 
 
 logger = logging.getLogger(__name__)
@@ -115,17 +115,3 @@ class ProviderSimulator:
             request_id=issue_request.request_id,
             code=key.code
         )
-
-
-
-provider_a = ProviderSimulator(
-    name="A",
-    error_chance=0.1,
-    timeout_chance=0.1,
-)
-
-provider_b = ProviderSimulator(
-    name="B",
-    error_chance=0.05,
-    timeout_chance=0.05,
-)

@@ -2,26 +2,27 @@ import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.clients import ProviderError
 from app.core.generate_ids import generate_request_id
 from app.enums import OrderStatus, PaymentStatus, DeliveryStatus
 from app.models import Delivery
-from app.repositories import PaymentRepository, ProviderKeyRepository
+from app.repositories import PaymentRepository
 from app.schemas.payment import PaymentWebhook
 from app.schemas.provider import ProviderIssueRequest
-from provider.provider_simulator import ProviderError
 from app.services.provider_service import ProviderService
 
 logger = logging.getLogger(__name__)
 
 
 class PaymentService:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+            self,
+            session: AsyncSession,
+            provider_service: ProviderService
+    ) -> None:
         self.session = session
         self.repository = PaymentRepository(session)
-        self.provider_key_repository = ProviderKeyRepository(session)
-        self.provider_service = ProviderService(
-            provider_key_repository=self.provider_key_repository,
-        )
+        self.provider_service = provider_service
 
     async def process_webhook(
         self,
@@ -92,6 +93,8 @@ class PaymentService:
 
             self.session.add(delivery)
             await self.session.flush()
+
+            await self.session.commit()
 
 
             issue_request = ProviderIssueRequest(

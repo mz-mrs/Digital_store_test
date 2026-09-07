@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import get_session
+from app.api.dependencies import get_payment_service
 from app.schemas.payment import PaymentWebhook, PaymentWebhookResponse
 from app.services import PaymentService
 
@@ -19,9 +18,8 @@ router = APIRouter(
 )
 async def payment_webhook(
     payload: PaymentWebhook,
-    session: AsyncSession = Depends(get_session),
+    service: PaymentService = Depends(get_payment_service),
 ) -> PaymentWebhookResponse:
-    service = PaymentService(session)
 
     await service.process_webhook(payload)
 

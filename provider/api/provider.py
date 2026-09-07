@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
-from app.repositories import ProviderKeyRepository
+from provider.provider_key_repository import ProviderKeyRepository
 from app.schemas.provider import (
     ProviderIssueRequest,
     ProviderIssueResponse,

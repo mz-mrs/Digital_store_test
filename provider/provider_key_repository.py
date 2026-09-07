@@ -1,10 +1,8 @@
-from uuid import UUID
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.enums import ProviderKeyStatus
-from app.models import ProviderKey, Delivery
+from app.models import Delivery, ProviderKey
 
 
 class ProviderKeyRepository:
@@ -12,25 +10,17 @@ class ProviderKeyRepository:
         self.session = session
 
     async def take_available_key(
-        self,
-        request_id: str,
-        order_id: str
+            self,
+            request_id: str,
+            order_id: str,
     ) -> ProviderKey | None:
 
         result = await self.session.execute(
-            select(ProviderKey).where(
-                ProviderKey.request_id == request_id
-            )
-        )
-
-        key = result.scalar_one_or_none()
-
-        if key is not None:
-            return key
-
-        result = await self.session.execute(
             select(Delivery)
-            .where(Delivery.order_id == order_id)
+            .where(
+                Delivery.order_id == order_id,
+                Delivery.request_id == request_id,
+            )
             .with_for_update()
         )
 
@@ -51,13 +41,11 @@ class ProviderKeyRepository:
 
         key = result.scalar_one_or_none()
 
-
         if key is None:
             return None
 
         key.status = ProviderKeyStatus.ISSUED
         key.delivery_id = delivery.id
-        key.request_id = request_id
 
         return key
 
@@ -67,8 +55,13 @@ class ProviderKeyRepository:
     ) -> ProviderKey | None:
 
         result = await self.session.execute(
-            select(ProviderKey).where(
-                ProviderKey.request_id == request_id
+            select(ProviderKey)
+            .join(
+                Delivery,
+                ProviderKey.delivery_id == Delivery.id,
+            )
+            .where(
+                Delivery.request_id == request_id
             )
         )
 

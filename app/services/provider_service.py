@@ -1,27 +1,27 @@
 import logging
 
-from app.repositories import ProviderKeyRepository
+from app.clients import ProviderClient, ProviderError
 from app.schemas.provider import ProviderIssueRequest
-from provider.provider_simulator import provider_a, provider_b
-from provider.provider_simulator import ProviderError
 
 logger = logging.getLogger(__name__)
 
 
 class ProviderService:
-    def __init__(self, provider_key_repository: ProviderKeyRepository) -> None:
-        self.provider_key_repository = provider_key_repository
+    def __init__(
+            self,
+            providers: tuple[ProviderClient, ...],
+    ) -> None:
+        self.providers = providers
 
     async def issue(
         self,
         issue_request: ProviderIssueRequest,
     ) -> tuple[str, str]:
 
-        for provider in (provider_a, provider_b):
+        for provider in self.providers:
             try:
                 response = await provider.issue(
-                    issue_request=issue_request,
-                    provider_key_repository=self.provider_key_repository,
+                    issue_request=issue_request
                 )
 
                 if response.status == "ok":

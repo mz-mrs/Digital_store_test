@@ -28,13 +28,6 @@ class ProviderKey(Base):
         index=True,
     )
 
-    request_id: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True,
-        unique=True,
-        index=True,
-    )
-
     status: Mapped[ProviderKeyStatus] = mapped_column(
         Enum(
             ProviderKeyStatus,
