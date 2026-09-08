@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.orders import router as orders_router
+from app.api.ckeck import router as check_router
 from app.api.payment_webhook import router as payment_router
 
 import logging
@@ -31,3 +32,4 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(orders_router)
 app.include_router(payment_router)
+app.include_router(check_router)

@@ -1,8 +1,11 @@
-from sqlalchemy import select
+from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import select, func
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.enums import DeliveryStatus, PaymentStatus, OrderStatus
 from app.models import Order, PaymentEvent, Delivery
 from app.schemas.payment import PaymentWebhook
 
@@ -56,3 +59,114 @@ class PaymentRepository:
             .where(Delivery.id == delivery_id)
             .with_for_update()
         )
+
+    async def get_paid_not_delivered(self) -> list:
+        latest_payment = (
+            select(
+                PaymentEvent.order_id,
+                func.max(PaymentEvent.created_at).label("latest_created_at"),
+            )
+            .group_by(PaymentEvent.order_id)
+            .subquery()
+        )
+
+        result = await self.session.execute(
+            select(Order, Delivery)
+            .join(
+                Delivery,
+                Delivery.order_id == Order.id,
+            )
+            .join(
+                latest_payment,
+                latest_payment.c.order_id == Order.id,
+            )
+            .join(
+                PaymentEvent,
+                (PaymentEvent.order_id == Order.id)
+                & (
+                        PaymentEvent.created_at
+                        == latest_payment.c.latest_created_at
+                ),
+            )
+            .where(
+                PaymentEvent.status == PaymentStatus.PAID,
+                Delivery.status != DeliveryStatus.DELIVERED,
+            )
+        )
+
+        return list(result.all())
+
+
+    async def get_delivered_not_paid(self) -> list:
+        latest_payment = (
+            select(
+                PaymentEvent.order_id,
+                func.max(PaymentEvent.created_at).label("latest_created_at"),
+            )
+            .group_by(PaymentEvent.order_id)
+            .subquery()
+        )
+
+        result = await self.session.execute(
+            select(Order, Delivery)
+            .join(
+                Delivery,
+                Delivery.order_id == Order.id,
+            )
+            .join(
+                latest_payment,
+                latest_payment.c.order_id == Order.id,
+            )
+            .join(
+                PaymentEvent,
+                (PaymentEvent.order_id == Order.id)
+                & (
+                        PaymentEvent.created_at
+                        == latest_payment.c.latest_created_at
+                ),
+            )
+            .where(
+                PaymentEvent.status != PaymentStatus.PAID,
+                Delivery.status == DeliveryStatus.DELIVERED,
+            )
+        )
+
+        return list(result.all())
+
+    async def get_pending_deliveries(self) -> list[Delivery]:
+        result = await self.session.execute(
+            select(Delivery)
+            .join(Order, Delivery.order_id == Order.id)
+            .join(PaymentEvent, PaymentEvent.order_id == Order.id)
+            .where(
+                Order.status == OrderStatus.PAID,
+                Delivery.status == DeliveryStatus.PENDING,
+                PaymentEvent.status == PaymentStatus.PAID,
+            )
+            .distinct(Delivery.id)
+        )
+
+        return list(result.scalars().all())
+
+
+    async def get_stuck_deliveries(
+        self,
+        older_than_seconds: int = 60,
+    ) -> list[Delivery]:
+        threshold = datetime.now(timezone.utc) - timedelta(
+            seconds=older_than_seconds
+        )
+
+        result = await self.session.execute(
+            select(Delivery)
+            .join(Order, Delivery.order_id == Order.id)
+            .where(
+                Order.status == OrderStatus.PAID,
+                Delivery.status == DeliveryStatus.PENDING,
+                Delivery.updated_at < threshold,
+            )
+            .with_for_update(skip_locked=True)
+        )
+
+        return list(result.scalars().all())
+

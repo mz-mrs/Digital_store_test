@@ -25,11 +25,11 @@ def get_provider_service() -> ProviderService:
         providers=(
             ProviderClient(
                 name="A",
-                base_url="http://127.0.0.1:9001",
+                base_url="http://127.0.0.1:8001",
             ),
             ProviderClient(
                 name="B",
-                base_url="http://127.0.0.1:9002",
+                base_url="http://127.0.0.1:8002",
             ),
         ),
     )
