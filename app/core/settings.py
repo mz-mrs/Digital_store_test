@@ -8,6 +8,13 @@ class Settings(BaseSettings):
     postgres_host: str = "localhost"
     postgres_port: int = 5432
 
+    rabbitmq_user: str
+    rabbitmq_password: str
+    rabbitmq_host: str
+    rabbitmq_port: int
+
+    rabbitmq_url: str = "amqp://guest:guest@localhost:5672/"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

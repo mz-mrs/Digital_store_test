@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models import Order, PaymentEvent
+from app.models import Order, PaymentEvent, Delivery
 from app.schemas.payment import PaymentWebhook
 
 
@@ -46,3 +46,13 @@ class PaymentRepository:
         result = await self.session.execute(statement)
 
         return result.rowcount == 1
+
+    async def get_delivery_for_update(
+            self,
+            delivery_id: int,
+    ) -> Delivery | None:
+        return await self.session.scalar(
+            select(Delivery)
+            .where(Delivery.id == delivery_id)
+            .with_for_update()
+        )

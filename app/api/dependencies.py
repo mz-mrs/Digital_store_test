@@ -1,4 +1,4 @@
-from fastapi import Depends
+from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
@@ -36,10 +36,12 @@ def get_provider_service() -> ProviderService:
 
 
 def get_payment_service(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     provider_service: ProviderService = Depends(get_provider_service),
 ) -> PaymentService:
     return PaymentService(
         session=session,
         provider_service=provider_service,
+        publisher=request.app.state.delivery_publisher,
     )

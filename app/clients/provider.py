@@ -8,6 +8,7 @@ from app.schemas.provider import (
 class ProviderError(Exception):
     pass
 
+
 class ProviderClient:
     def __init__(
         self,
