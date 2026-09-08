@@ -64,7 +64,7 @@ async def consume() -> None:
 
             except Exception:
 
-                logger.error("Ошибка обработки delivery.issue")
+                logger.exception("Ошибка обработки delivery.issue")
 
                 exchange = await channel.get_exchange("delivery")
 

@@ -266,7 +266,7 @@ class PaymentService:
 
             await self.session.commit()
 
-            logger.error(
+            logger.exception(
                 "Не удалось осуществить выдачу order_id=%s delivery_id=%s request_id=%s",
                 delivery.order_id,
                 delivery.id,
