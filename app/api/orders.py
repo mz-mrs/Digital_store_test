@@ -1,11 +1,9 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, status, HTTPException
 
 from app.api.dependencies import get_order_service, get_order_repository
-from app.repositories.order import OrderRepository
+from app.repositories import OrderRepository
 from app.schemas.order import OrderCreate, OrderResponse
-from app.services.order import OrderService, ProductNotFoundError
+from app.services import OrderService, ProductNotFoundError, OrderAlreadyExistsError
 
 router = APIRouter(
     prefix="/orders",
@@ -23,11 +21,17 @@ async def create_order(
     data: OrderCreate,
     service: OrderService = Depends(get_order_service),
 ) -> OrderResponse:
+
     try:
         order = await service.create_order(data)
     except ProductNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except OrderAlreadyExistsError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
 

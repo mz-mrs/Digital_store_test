@@ -3,12 +3,17 @@ from app.models import Order, OrderItem
 from app.repositories.order import OrderRepository
 from app.schemas.order import OrderCreate
 
+from sqlalchemy.exc import IntegrityError
+
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 class ProductNotFoundError(Exception):
+    pass
+
+class OrderAlreadyExistsError(Exception):
     pass
 
 
@@ -65,7 +70,17 @@ class OrderService:
                 payment_event.status.value,
             )
 
-        order = await self.repository.create(order)
+        try:
+            order = await self.repository.create(order)
+        except IntegrityError as exc:
+            logger.warning(
+                "Заказ уже существует: order_id=%s",
+                data.order_id,
+            )
+            raise OrderAlreadyExistsError(
+                f"Заказ {data.order_id} уже существует"
+            ) from exc
+
 
         logger.info(
             "Заказ создан успешно: order_id=%s amount=%s",

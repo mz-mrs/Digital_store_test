@@ -29,9 +29,10 @@ class DeliveryPublisher:
 
         message = aio_pika.Message(
             body=json.dumps(
-                {"delivery_id": delivery_id}
+                {"delivery_id": str(delivery_id)}
             ).encode(),
             delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+            content_type="application/json",
         )
 
         await self.channel.default_exchange.publish(
