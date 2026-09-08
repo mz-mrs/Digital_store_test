@@ -4,12 +4,12 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
-from provider.provider_key_repository import ProviderKeyRepository
+from simulators.provider.provider_key_repository import ProviderKeyRepository
 from app.schemas.provider import (
     ProviderIssueRequest,
     ProviderIssueResponse,
 )
-from provider.provider_simulator import ProviderSimulator
+from simulators.provider.provider_simulator import ProviderSimulator
 
 logger = logging.getLogger(__name__)
 

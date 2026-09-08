@@ -2,8 +2,8 @@ import asyncio
 import logging
 from random import random
 
-from provider.provider_key_repository import ProviderKeyRepository
-from provider.provider_schemas import ProviderIssueRequest, ProviderIssueResponse
+from simulators.provider.provider_key_repository import ProviderKeyRepository
+from simulators.provider.provider_schemas import ProviderIssueRequest, ProviderIssueResponse
 
 
 logger = logging.getLogger(__name__)

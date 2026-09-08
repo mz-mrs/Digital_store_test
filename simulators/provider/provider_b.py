@@ -1,7 +1,7 @@
 import uvicorn
 
-from provider.app_provider import create_provider_app
-from provider.provider_simulator import ProviderSimulator
+from simulators.provider.app_provider import create_provider_app
+from simulators.provider.provider_simulator import ProviderSimulator
 
 
 provider = ProviderSimulator(

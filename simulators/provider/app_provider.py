@@ -2,8 +2,8 @@ import logging
 
 from fastapi import FastAPI
 
-from provider.api.provider import create_provider_router
-from provider.provider_simulator import ProviderSimulator
+from simulators.provider.api.provider import create_provider_router
+from simulators.provider.provider_simulator import ProviderSimulator
 
 logging.basicConfig(level=logging.INFO)
 
