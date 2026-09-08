@@ -272,7 +272,7 @@ class PaymentService:
                 delivery.id,
                 delivery.request_id,
             )
-            return
+            raise
 
 
         delivery.provider = provider

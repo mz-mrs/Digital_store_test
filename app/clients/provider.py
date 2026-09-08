@@ -25,16 +25,22 @@ class ProviderClient:
         issue_request: ProviderIssueRequest,
     ) -> ProviderIssueResponse:
 
-        async with httpx.AsyncClient(
-            timeout=self.timeout,
-        ) as client:
-            response = await client.post(
-                f"{self.base_url}/issue",
-                json=issue_request.model_dump(),
+        try:
+            async with httpx.AsyncClient(
+                    timeout=self.timeout,
+            ) as client:
+                response = await client.post(
+                    f"{self.base_url}/issue",
+                    json=issue_request.model_dump(),
+                )
+
+            response.raise_for_status()
+
+            return ProviderIssueResponse.model_validate(
+                response.json()
             )
 
-        response.raise_for_status()
-
-        return ProviderIssueResponse.model_validate(
-            response.json()
-        )
+        except (httpx.HTTPError, ValueError) as exc:
+            raise ProviderError(
+                f"Ошибка провайдера {self.name}: {exc}"
+            ) from exc

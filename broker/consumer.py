@@ -2,30 +2,14 @@ import json
 import logging
 
 from app.broker.connection import create_connection
-from app.clients import ProviderClient
 from app.db.session import async_session_factory
 from app.services import PaymentService
-from app.services.provider_service import ProviderService
+
+from app.api.dependencies import get_provider_service
 
 logger = logging.getLogger(__name__)
 
 QUEUE_NAME = "delivery.issue"
-
-
-def get_provider_service() -> ProviderService:
-    return ProviderService(
-        providers=(
-            ProviderClient(
-                name="A",
-                base_url="http://127.0.0.1:8001",
-            ),
-            ProviderClient(
-                name="B",
-                base_url="http://127.0.0.1:8002",
-            ),
-        ),
-    )
-
 
 async def process_message(message) -> None:
     payload = json.loads(message.body)
