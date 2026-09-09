@@ -1,14 +1,25 @@
-.git
-.gitignore
-.venv
-__pycache__
+# Python
+__pycache__/
 *.py[cod]
-.pytest_cache
-.mypy_cache
-.ruff_cache
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environment
+.venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Environment
 .env
 .env.*
-!.env.docker
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
 README.md
-tests
-.idea/

@@ -32,6 +32,19 @@ class ProviderKeyRepository:
         result = await self.session.execute(
             select(ProviderKey)
             .where(
+                ProviderKey.delivery_id == delivery.id,
+                ProviderKey.status == ProviderKeyStatus.ISSUED,
+            )
+        )
+
+        existing_key = result.scalar_one_or_none()
+
+        if existing_key is not None:
+            return existing_key
+
+        result = await self.session.execute(
+            select(ProviderKey)
+            .where(
                 ProviderKey.status == ProviderKeyStatus.AVAILABLE
             )
             .order_by(ProviderKey.created_at)

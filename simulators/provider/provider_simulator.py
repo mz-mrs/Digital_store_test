@@ -69,6 +69,20 @@ class ProviderSimulator:
                 f"Провайдер {self.name} вернул 500"
             )
 
+
+        if roll < self.error_chance + self.timeout_chance:
+            logger.warning(
+                "Провайдер %s: выбран сценарий timeout request_id=%s",
+                self.name,
+                issue_request.request_id,
+            )
+
+            await asyncio.sleep(self.timeout_delay)
+
+            raise TimeoutError(
+                f"Провайдер {self.name} таймаут"
+            )
+
         key = await provider_key_repository.take_available_key(
             request_id=issue_request.request_id,
             order_id=issue_request.order_id,
@@ -89,19 +103,6 @@ class ProviderSimulator:
             # raise ProviderError(
             #     f"Провайдер {self.name}: out of stock"
             # )
-
-        if roll < self.error_chance + self.timeout_chance:
-            logger.warning(
-                "Провайдер %s: выбран сценарий timeout request_id=%s",
-                self.name,
-                issue_request.request_id,
-            )
-
-            await asyncio.sleep(self.timeout_delay)
-
-            raise TimeoutError(
-                f"Провайдер {self.name} таймаут"
-            )
 
         logger.info(
             "Провайдер %s: ключ выдан request_id=%s code=%s",
