@@ -1,6 +1,7 @@
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.settings import settings
 from app.db.session import get_session
 from app.repositories.order import OrderRepository
 from app.services import OrderService, PaymentService
@@ -25,11 +26,11 @@ def get_provider_service() -> ProviderService:
         providers=(
             ProviderClient(
                 name="A",
-                base_url="http://127.0.0.1:8001",
+                base_url=settings.provider_a_url,
             ),
             ProviderClient(
                 name="B",
-                base_url="http://127.0.0.1:8002",
+                base_url=settings.provider_b_url,
             ),
         ),
     )

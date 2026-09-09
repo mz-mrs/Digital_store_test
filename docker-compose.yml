@@ -32,5 +32,61 @@ services:
       timeout: 5s
       retries: 5
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: digital_store_api
+    command: >
+      sh -c "
+        alembic upgrade head &&
+        python -m app.scripts.products_to_db &&
+        python -m app.scripts.keys_to_provider_keys &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000
+      "
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: digital_store_consumer
+    command: python -m broker.main
+    env_file:
+      - .env.docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  provider_a:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: digital_store_provider_a
+    env_file: .env.docker
+    command: python -m simulators.provider.provider_a
+    ports:
+      - "8001:8000"
+
+  provider_b:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: digital_store_provider_b
+    env_file: .env.docker
+    command: python -m simulators.provider.provider_b
+    ports:
+      - "8002:8000"
+
 volumes:
   postgres_data:

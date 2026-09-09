@@ -15,6 +15,9 @@ class Settings(BaseSettings):
 
     rabbitmq_url: str = "amqp://guest:guest@localhost:5672/"
 
+    provider_a_url: str = "http://127.0.0.1:8001"
+    provider_b_url: str = "http://127.0.0.1:8002"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
