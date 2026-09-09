@@ -3,7 +3,6 @@ import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.broker.publisher import DeliveryPublisher
-from app.clients import ProviderError
 from app.core.generate_ids import generate_request_id
 from app.enums import OrderStatus, PaymentStatus, DeliveryStatus
 from app.models import Delivery

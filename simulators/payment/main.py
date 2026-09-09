@@ -2,14 +2,13 @@ import logging
 
 from fastapi import FastAPI
 
+from app.core.settings import settings
 from simulators.payment.api import create_payment_router
 from simulators.payment.payment_simulator import PaymentSimulator
 
 
 logging.basicConfig(level=logging.INFO)
 
-WEBHOOK_URL = "http://127.0.0.1:8000/webhook/payment"
-API_URL = "http://127.0.0.1:8000"
 
 
 def create_payment_app() -> FastAPI:
@@ -18,8 +17,8 @@ def create_payment_app() -> FastAPI:
     )
 
     simulator = PaymentSimulator(
-        webhook_url=WEBHOOK_URL,
-        api_url=API_URL
+        webhook_url=settings.webhook_url,
+        api_url=settings.api_url
     )
 
     app.include_router(

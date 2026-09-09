@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     provider_a_url: str = "http://127.0.0.1:8001"
     provider_b_url: str = "http://127.0.0.1:8002"
 
+    api_url: str = 'http://127.0.0.1:8000'
+    webhook_url:str = "http://127.0.0.1:8000/webhook/payment"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
