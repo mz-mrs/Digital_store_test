@@ -9,6 +9,9 @@ from app.db.session import async_session_factory
 from app.models import ProviderKey
 from app.enums import ProviderKeyStatus
 
+logging.basicConfig(
+    level=logging.INFO
+)
 logger = logging.getLogger(__name__)
 
 KEYS_FILE = Path(__file__).parent.parent / "data" / "keys.json"

@@ -9,6 +9,9 @@ from sqlalchemy import select
 from app.db.session import async_session_factory
 from app.models.product import Currency, Product, ProductType
 
+logging.basicConfig(
+    level=logging.INFO
+)
 logger = logging.getLogger(__name__)
 
 

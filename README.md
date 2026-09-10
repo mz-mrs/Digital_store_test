@@ -184,7 +184,7 @@ digital_store_provider_b
 Для запуска всей системы достаточно выполнить:
 
 ```bash
-docker compose up --build
+docker compose --env-file .env.docker up --build 
 ```
 
 При старте автоматически выполняются:
@@ -280,7 +280,7 @@ provider_keys
 
 Таким образом, после обычного:
 ```bash
-docker compose up --build
+docker compose --env-file .env.docker up --build 
 ```
 проект сразу имеет необходимую схему БД и тестовые данные.
 
